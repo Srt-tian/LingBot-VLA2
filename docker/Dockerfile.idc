@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 RUN --mount=type=bind,from=deps,source=wheels,target=/wheels \
     python -m pip install --no-index --find-links=/wheels \
-      -r requirements.txt -r requirements-depth.txt setuptools==75.8.0 wheel==0.45.1 \
+      -r requirements.txt -r docker/requirements-depth.idc.txt setuptools==75.8.0 wheel==0.45.1 \
     && python -m pip install --no-index --find-links=/wheels --no-deps \
       lerobot==0.3.3 flash-attn==2.8.3 numpydantic==1.9.0 \
     && python -m pip install --no-build-isolation --no-deps -e . \

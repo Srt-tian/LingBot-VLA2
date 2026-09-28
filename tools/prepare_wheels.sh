@@ -13,7 +13,7 @@ export PATH=/stage/bootstrap/bin:/usr/local/cuda/bin:$PATH
 python -m pip download --no-deps --dest /stage/wheels --index-url https://download.pytorch.org/whl/cu126 \
   torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 triton==3.4.0
 python -m pip wheel --wheel-dir /stage/wheels --find-links /stage/wheels \
-  -r /src/requirements.txt -r /src/requirements-depth.txt \
+  -r /src/requirements.txt -r /src/docker/requirements-depth.idc.txt \
   setuptools==75.8.0 wheel==0.45.1
 python -m pip download --no-deps --dest /stage/wheels lerobot==0.3.3 numpydantic==1.9.0
 # FlashAttention needs Torch installed to compile its wheel. Pin the same stack

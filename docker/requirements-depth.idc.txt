@@ -1,0 +1,11 @@
+# VLA runtime needs depth model imports, not the standalone MoGe training server.
+# Full mlflow==2.22.5 requires pyarrow<20, conflicting with upstream pyarrow21.
+# The skinny distribution exposes the logging API without that dependency.
+accelerate==1.7.0
+mlflow-skinny==2.22.5
+python-json-logger==3.3.0
+oss2==2.19.1
+click==8.1.7
+trimesh==4.5.1
+moderngl==5.12.0
+plyfile==1.1.4
