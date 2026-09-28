@@ -4,7 +4,7 @@
 set -Eeuo pipefail
 export TMPDIR=/stage/tmp PIP_CACHE_DIR=/stage/pip-cache
 export PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=0
-export MAX_JOBS=4 CMAKE_BUILD_PARALLEL_LEVEL=4
+export MAX_JOBS=1 CMAKE_BUILD_PARALLEL_LEVEL=1 NVCC_THREADS=1
 mkdir -p "$TMPDIR" "$PIP_CACHE_DIR" /stage/wheels
 if [[ ! -x /stage/bootstrap/bin/python ]]; then
   bash /stage/Miniconda3-py312_25.1.1-2-Linux-x86_64.sh -b -p /stage/bootstrap
@@ -20,7 +20,7 @@ python -m pip download --no-deps --dest /stage/wheels lerobot==0.3.3 numpydantic
 # used in the final image; all package caches and temporary downloads are on PFS.
 python -m pip install --no-index --find-links /stage/wheels \
   torch==2.8.0 packaging==25.0 ninja==1.11.1.4 wheel setuptools
-export FLASH_ATTENTION_FORCE_BUILD=TRUE TORCH_CUDA_ARCH_LIST='8.0;8.9;9.0'
+export FLASH_ATTENTION_FORCE_BUILD=TRUE FLASH_ATTN_CUDA_ARCHS='80;90'
 python -m pip wheel --no-deps --no-build-isolation --wheel-dir /stage/wheels flash-attn==2.8.3
 sha256sum /stage/wheels/* > /stage/wheels.sha256
 echo WHEELHOUSE_READY

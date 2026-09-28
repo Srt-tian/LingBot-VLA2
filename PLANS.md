@@ -59,3 +59,8 @@ remote before training submission; the upstream official repository is read-only
   full/skinny variants conflict with upstream PyArrow21/Packaging25 respectively.
 - Pin plyfile1.1.2 (declares numpy>=1.21), not1.1.4 (requires numpy>=2), preserving
   the model environment's NumPy1.26.4. Verify depth/runtime imports after build.
+- Wheelprep r5 reached FlashAttention CUDA compilation but cgroup memory.events
+  recorded oom=34, oom_kill=3 under 24GiB. Stop that build; retain caches/logs.
+  Use MAX_JOBS=1 and NVCC_THREADS=1 for the retry. Explicitly set the build's
+  actual FLASH_ATTN_CUDA_ARCHS=80;90 (TORCH_CUDA_ARCH_LIST is not its selector).
+  GPU runtime compatibility still requires validation before either cluster run.
