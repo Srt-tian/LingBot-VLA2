@@ -9,6 +9,8 @@ MagicVLA training checkouts, inference services, containers, datasets, or norms.
 - Starting commit: be969b8fd117fb70550c5d4bf4bc328211b5b1b6
 - Branch: train/piper-five-idc-smoke
 - User-authorized writable remote: https://github.com/Srt-tian/LingBot-VLA2.git
+- User now requests local IDC commits during iteration, with one consolidated
+  GitHub push after stabilization. Do not push each preparation change.
 - Runtime target: Python 3.12, Torch 2.8.0+cu126, FlashAttention 2.8.3.
 - Upstream docker/Dockerfile is stale (Torch 2.5.1); use the independent
   docker/Dockerfile.idc after verifying the wheelhouse.
@@ -47,9 +49,13 @@ remote before training submission; the upstream official repository is read-only
   timestamp monotonicity, and metadata-count checks (CPU-only parquet audit).
 - Upstream pad_and_concat / prepare_state / prepare_action isolated unit test
   passed: state55, action50x55, valid slots0..11 and28,29, all inactive slots zero.
-- Native VLA base/depth/DINO-video and MoGe weights checksum verified. Qwen first
-  shard verified; last shard prematurely ended and is retained for explicit
-  checked Content-Range resume. Never use a .partial artifact.
+- Native VLA base/depth/DINO-video, Qwen and MoGe weights checksum verified.
+  Qwen last shard was recovered by checked Content-Range resume. Never use a
+  .partial artifact.
 - First wheelprep stopped on pip read timeout. Preserve cache, use 120s timeout,
   no automated retries, fetch only Torch/vision/audio/Triton from cu126 index,
   and resolve remaining packages from PyPI to avoid unnecessary CDN transfers.
+- Exclude MLflow from the VLA runtime: only standalone MoGe train.py uses it;
+  full/skinny variants conflict with upstream PyArrow21/Packaging25 respectively.
+- Pin plyfile1.1.2 (declares numpy>=1.21), not1.1.4 (requires numpy>=2), preserving
+  the model environment's NumPy1.26.4. Verify depth/runtime imports after build.

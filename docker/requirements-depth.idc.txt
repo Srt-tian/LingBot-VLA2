@@ -8,4 +8,5 @@ oss2==2.19.1
 click==8.1.7
 trimesh==4.5.1
 moderngl==5.12.0
-plyfile==1.1.4
+# 1.1.4 requires NumPy2; 1.1.2 supports upstream's NumPy1.26.
+plyfile==1.1.2
