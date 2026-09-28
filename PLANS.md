@@ -64,3 +64,7 @@ remote before training submission; the upstream official repository is read-only
   Use MAX_JOBS=1 and NVCC_THREADS=1 for the retry. Explicitly set the build's
   actual FLASH_ATTN_CUDA_ARCHS=80;90 (TORCH_CUDA_ARCH_LIST is not its selector).
   GPU runtime compatibility still requires validation before either cluster run.
+- Fresh wheelprep r6 exposed missing libexpat.so.1 before pip started. Bootstrap
+  has a dangling libexpat symlink and the CUDA base lacks system libexpat1.
+  Explicitly install libexpat1 in preparation and final image; cause of missing
+  bootstrap target is not established. Do not attribute it to CUDA or training.

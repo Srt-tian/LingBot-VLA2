@@ -2,6 +2,8 @@
 # Run inside the already-present CUDA 12.6 devel container with /stage mounted
 # from /pfs/user/data/lingbot_vla_v2/build. Never download packages locally.
 set -Eeuo pipefail
+apt-get update
+apt-get install -y --no-install-recommends libexpat1
 export TMPDIR=/stage/tmp PIP_CACHE_DIR=/stage/pip-cache
 export PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=0
 export MAX_JOBS=1 CMAKE_BUILD_PARALLEL_LEVEL=1 NVCC_THREADS=1

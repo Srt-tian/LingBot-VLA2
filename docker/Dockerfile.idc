@@ -11,7 +11,7 @@ COPY --from=deps Miniconda3-py312_25.1.1-2-Linux-x86_64.sh /tmp/miniconda.sh
 RUN bash /tmp/miniconda.sh -b -p /opt/conda && rm /tmp/miniconda.sh
 WORKDIR /opt/lingbot-vla-v2
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ffmpeg libgl1 libglib2.0-0 libgomp1 build-essential git pkg-config ca-certificates \
+      ffmpeg libgl1 libglib2.0-0 libgomp1 libexpat1 build-essential git pkg-config ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN --mount=type=bind,from=deps,source=wheels,target=/wheels \
