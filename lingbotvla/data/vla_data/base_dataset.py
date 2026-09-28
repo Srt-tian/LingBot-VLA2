@@ -107,7 +107,7 @@ class LeRobotDataset(BaseLeRobotDataset):
         """
         item = {}
         for vid_key, query_ts in query_timestamps.items():
-            if LEROBOT_DATASET_API == "v3":
+            if int(self.meta.info["codebase_version"].lstrip("v").split(".")[0]) >= 3:
                 # LeRobot v3 stores episodes sequentially in a shared mp4, so
                 # query timestamps are relative to the episode start.
                 ep = self.meta.episodes[ep_idx]
