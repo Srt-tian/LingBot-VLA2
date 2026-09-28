@@ -23,5 +23,5 @@ RUN --mount=type=bind,from=deps,source=wheels,target=/wheels \
       -e lingbotvla/models/vla/vision_models/lingbot-depth \
       -e lingbotvla/models/vla/vision_models/MoGe
 RUN python -c "import site,pathlib; pathlib.Path(site.getsitepackages()[0], 'stablevla_local_depth.pth').write_text('/opt/lingbot-vla-v2/lingbotvla/models/vla/vision_models/morgbd_clean/3rd/utils3d\\n')"
-RUN python -c "import torch,transformers,flash_attn,cv2,accelerate,mlflow,trimesh,moge,mdm,utils3d; assert torch.__version__.split('+')[0]=='2.8.0'; print(torch.__version__,transformers.__version__,flash_attn.__version__)"
+RUN python -c "import torch,transformers,flash_attn,cv2,accelerate,trimesh,moge,mdm,utils3d; assert torch.__version__.split('+')[0]=='2.8.0'; print(torch.__version__,transformers.__version__,flash_attn.__version__)"
 CMD ["/bin/bash"]
