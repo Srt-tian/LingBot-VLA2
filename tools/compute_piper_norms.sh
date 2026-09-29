@@ -8,6 +8,8 @@ WORK_ROOT=/pfs/user/data/lingbot_vla_v2/preparation/norm_compute
 export PYTHONPATH="$REPO_DIR${PYTHONPATH:+:$PYTHONPATH}"
 export HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=2
+# Upstream argument initialization expects torchrun variables even on CPU.
+export LOCAL_RANK=0 RANK=0 WORLD_SIZE=1
 test -f "$REPO_DIR/scripts/compute_norm_stats.py"
 mkdir -p "$WORK_ROOT" "$DATA_ROOT/norm"
 cd "$WORK_ROOT"
