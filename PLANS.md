@@ -68,3 +68,8 @@ remote before training submission; the upstream official repository is read-only
   has a dangling libexpat symlink and the CUDA base lacks system libexpat1.
   Explicitly install libexpat1 in preparation and final image; cause of missing
   bootstrap target is not established. Do not attribute it to CUDA or training.
+- r7 failed importing setuptools: installed jaraco/text/Lorem ipsum.txt missing,
+  although the cached setuptools75.8.0 wheel passes ZIP integrity and contains it.
+  Preserve shared bootstrap for investigation; build in a fresh container-local
+  /opt/lingbot-build-env. Download cache/wheels remain on IDC PFS. Check imports
+  before resolving/building packages. No claim yet about underlying file loss.

@@ -8,10 +8,12 @@ export TMPDIR=/stage/tmp PIP_CACHE_DIR=/stage/pip-cache
 export PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=0
 export MAX_JOBS=1 CMAKE_BUILD_PARALLEL_LEVEL=1 NVCC_THREADS=1
 mkdir -p "$TMPDIR" "$PIP_CACHE_DIR" /stage/wheels
-if [[ ! -x /stage/bootstrap/bin/python ]]; then
-  bash /stage/Miniconda3-py312_25.1.1-2-Linux-x86_64.sh -b -p /stage/bootstrap
+BUILD_ENV=/opt/lingbot-build-env
+if [[ ! -x "$BUILD_ENV/bin/python" ]]; then
+  bash /stage/Miniconda3-py312_25.1.1-2-Linux-x86_64.sh -b -p "$BUILD_ENV"
 fi
-export PATH=/stage/bootstrap/bin:/usr/local/cuda/bin:$PATH
+export PATH="$BUILD_ENV/bin:/usr/local/cuda/bin:$PATH"
+python -c "import setuptools,xml.parsers.expat; print('BUILD_ENV_IMPORTS_OK')"
 python -m pip download --no-deps --dest /stage/wheels --index-url https://download.pytorch.org/whl/cu126 \
   torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 triton==3.4.0
 python -m pip wheel --wheel-dir /stage/wheels --find-links /stage/wheels \
