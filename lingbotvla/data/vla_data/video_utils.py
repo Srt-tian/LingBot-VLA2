@@ -168,6 +168,20 @@ def decode_video_frames_torchvision(
     return closest_frames
 
 
+def decode_video_frames_by_index(video_path, indices, expected_frames):
+    """Exact ordinal decoding for explicitly audited one-row/one-frame exports."""
+    from torchcodec.decoders import VideoDecoder
+
+    decoder = VideoDecoder(str(video_path), device="cpu", seek_mode="exact")
+    if len(decoder) != expected_frames:
+        raise ValueError(f"Video/row count changed: {video_path}: {len(decoder)} != {expected_frames}")
+    if any(i < 0 or i >= expected_frames for i in indices):
+        raise IndexError(f"Invalid video frame indices: {indices}")
+    frames = decoder.get_frames_at(indices=indices).data
+    assert len(frames) == len(indices)
+    return frames.to(torch.uint8)
+
+
 def decode_video_frames_torchcodec(
     video_path: Path | str,
     timestamps: list[float],

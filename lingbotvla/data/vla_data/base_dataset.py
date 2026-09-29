@@ -36,7 +36,7 @@ from datasets import load_dataset as _hf_load_dataset
 
 from ...utils import logging
 from .utils import FeatureTransform
-from .video_utils import decode_video_frames
+from .video_utils import decode_video_frames, decode_video_frames_by_index
 
 
 logger = logging.get_logger(__name__)
@@ -78,6 +78,24 @@ class LeRobotDataset(BaseLeRobotDataset):
         super().__init__(repo_id, **kwargs)
         self.load_image = load_image
 
+    def load_hf_dataset(self):
+        dataset = super().load_hf_dataset()
+        if not self.meta.info.get("lingbot_frame_index_alignment", False):
+            return dataset
+        # Audited Piper exports retain one row per encoded video frame, while
+        # capture timestamps contain gaps. Keep capture time for provenance;
+        # only the in-memory sampling clock uses the contiguous row index.
+        plain = dataset.with_format(None)
+        if "source_timestamp" in plain.column_names:
+            raise ValueError("Refusing to replace an existing source_timestamp")
+        timestamps = plain["timestamp"]
+        frame_indices = plain["frame_index"]
+        plain = plain.add_column("source_timestamp", timestamps)
+        plain = plain.remove_columns("timestamp").add_column(
+            "timestamp", [int(i) / self.meta.fps for i in frame_indices]
+        )
+        return plain.with_transform(hf_transform_to_torch)
+
     def _query_hf_dataset(self, query_indices: dict[str, list[int]]) -> dict:
         """
         Query dataset for indices across keys, skipping video keys.
@@ -107,6 +125,12 @@ class LeRobotDataset(BaseLeRobotDataset):
         """
         item = {}
         for vid_key, query_ts in query_timestamps.items():
+            if self.meta.info.get("lingbot_frame_index_alignment", False):
+                length = self.meta.episodes[ep_idx]["length"]
+                indices = [max(0, min(round(ts * self.meta.fps), length - 1)) for ts in query_ts]
+                video_path = self.root / self.meta.get_video_file_path(ep_idx, vid_key)
+                item[vid_key] = decode_video_frames_by_index(video_path, indices, length).squeeze(0)
+                continue
             if int(self.meta.info["codebase_version"].lstrip("v").split(".")[0]) >= 3:
                 # LeRobot v3 stores episodes sequentially in a shared mp4, so
                 # query timestamps are relative to the episode start.
