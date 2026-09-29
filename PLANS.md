@@ -45,6 +45,16 @@ remote before training submission; the upstream official repository is read-only
 
 ## Completed preparation checks
 
+- No-external-FA2 image built from996b96b; imports passed and actual Qwen3 vision
+  SDPA/eager CPU outputs, gradients, packed-image isolation passed. No GPU smoke
+  acceptance yet. Fixed root license metadata for setuptools75; installed MoGe's
+  pinned utils3d commit3fab839f (upstream .pth directory was absent).
+- Actual loader found source episode stats are min/max-only and include scalars,
+  incompatible with LeRobot aggregation. tools/repair_view_episode_stats.py
+  preserves original VIEW stats, recomputes real min/max/mean/std/count for the
+  consumed qpos/action14 from every episode, and leaves raw sources untouched.
+  These compatibility statistics are NOT the per-task action-chunk training norm.
+
 - 2026-09-29 user explicitly requests no external FA2 to unblock smoke. Stop r8
   source compiler and its obsolete follow-on watchers. V2 HF submodels default
   to SDPA; smoke must explicitly set model.vit_attn_implementation=sdpa and
