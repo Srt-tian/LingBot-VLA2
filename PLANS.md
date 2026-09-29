@@ -11,7 +11,7 @@ MagicVLA training checkouts, inference services, containers, datasets, or norms.
 - User-authorized writable remote: https://github.com/Srt-tian/LingBot-VLA2.git
 - User now requests local IDC commits during iteration, with one consolidated
   GitHub push after stabilization. Do not push each preparation change.
-- Runtime target: Python 3.12, Torch 2.8.0+cu126, FlashAttention 2.8.3.
+- Runtime target: Python 3.12, Torch 2.8.0+cu126, native SDPA/Flex, no external FA2.
 - Upstream docker/Dockerfile is stale (Torch 2.5.1); use the independent
   docker/Dockerfile.idc after verifying the wheelhouse.
 - Download/build staging: /pfs/user/data/lingbot_vla_v2/build.
@@ -44,6 +44,13 @@ sanitized local EIP ledger. Publish execution commits to an authorized canonical
 remote before training submission; the upstream official repository is read-only.
 
 ## Completed preparation checks
+
+- 2026-09-29 user explicitly requests no external FA2 to unblock smoke. Stop r8
+  source compiler and its obsolete follow-on watchers. V2 HF submodels default
+  to SDPA; smoke must explicitly set model.vit_attn_implementation=sdpa and
+  model.attn_implementation=eager (outer wrapper dispatch), while keeping
+  train.attention_implementation=flex_cached. Image asserts flash_attn absent.
+  CPU imports, video decode, forward/backward and checkpoint acceptance pending.
 
 - All 1676 episodes / 973824 frames passed shape, finite-value, episode-index,
   timestamp monotonicity, and metadata-count checks (CPU-only parquet audit).

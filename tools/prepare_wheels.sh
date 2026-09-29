@@ -20,11 +20,6 @@ python -m pip wheel --wheel-dir /stage/wheels --find-links /stage/wheels \
   -r /src/requirements.txt -r /src/docker/requirements-depth.idc.txt \
   setuptools==75.8.0 wheel==0.45.1
 python -m pip download --no-deps --dest /stage/wheels lerobot==0.3.3 numpydantic==1.9.0
-# FlashAttention needs Torch installed to compile its wheel. Pin the same stack
-# used in the final image; all package caches and temporary downloads are on PFS.
-python -m pip install --no-index --find-links /stage/wheels \
-  torch==2.8.0 packaging==25.0 ninja==1.11.1.4 wheel setuptools
-export FLASH_ATTENTION_FORCE_BUILD=TRUE FLASH_ATTN_CUDA_ARCHS='80;90'
-python -m pip wheel --no-deps --no-build-isolation --wheel-dir /stage/wheels flash-attn==2.8.3
-sha256sum /stage/wheels/* > /stage/wheels.sha256
+# User-selected runtime uses native SDPA/Flex, no external flash-attn build.
+sha256sum /stage/wheels/*.whl > /stage/wheels.sha256
 echo WHEELHOUSE_READY

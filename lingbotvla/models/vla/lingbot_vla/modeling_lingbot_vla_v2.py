@@ -127,14 +127,17 @@ class QwenvlWithExpertV2Model(PreTrainedModel):
         vlm_config = AutoConfig.from_pretrained(self.config.tokenizer_path)
         if self.config.vocab_size not in (0, 257152):
             vlm_config.text_config.vocab_size = self.config.vocab_size
-        vlm_config._attn_implementation = "flash_attention_2"
-        vlm_config.text_config._attn_implementation = "flash_attention_2"
+        # The joint VLA attention remains FlexAttention. These HF submodels
+        # must not require the separately compiled flash-attn package at init.
+        backend = getattr(self.config, "submodel_attn_implementation", "sdpa")
+        vlm_config._attn_implementation = backend
+        vlm_config.text_config._attn_implementation = backend
         vlm_config.vision_config._attn_implementation = self.config.vit_attn_implementation
         self.qwenvl = Qwen3VLForConditionalGeneration._from_config(vlm_config)
         if self.config.use_lm_head:
             self.qwenvl.tie_weights()
 
-        self.config.qwen_expert_config._attn_implementation = "flash_attention_2"
+        self.config.qwen_expert_config._attn_implementation = backend
         self.qwen_expert = Qwen2ForCausalLM._from_config(self.config.qwen_expert_config, eval=eval)
 
         if getattr(self.config, "adanorm_time", False):
@@ -451,6 +454,7 @@ class FlowMatchingV2(FlowMatchingV1):
             "final_norm_adanorm",
             "precompute_grid_thw",
             "vit_attn_implementation",
+            "submodel_attn_implementation",
             "use_moe",
             "bias_update_speed",
             "token_moe_layers",

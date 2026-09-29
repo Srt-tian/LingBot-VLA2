@@ -18,10 +18,10 @@ RUN --mount=type=bind,from=deps,source=wheels,target=/wheels \
     python -m pip install --no-index --find-links=/wheels \
       -r requirements.txt -r docker/requirements-depth.idc.txt setuptools==75.8.0 wheel==0.45.1 \
     && python -m pip install --no-index --find-links=/wheels --no-deps \
-      lerobot==0.3.3 flash-attn==2.8.3 numpydantic==1.9.0 \
+      lerobot==0.3.3 numpydantic==1.9.0 \
     && python -m pip install --no-build-isolation --no-deps -e . \
       -e lingbotvla/models/vla/vision_models/lingbot-depth \
       -e lingbotvla/models/vla/vision_models/MoGe
 RUN python -c "import site,pathlib; pathlib.Path(site.getsitepackages()[0], 'stablevla_local_depth.pth').write_text('/opt/lingbot-vla-v2/lingbotvla/models/vla/vision_models/morgbd_clean/3rd/utils3d\\n')"
-RUN python -c "import torch,transformers,flash_attn,cv2,accelerate,trimesh,moge,mdm,utils3d; assert torch.__version__.split('+')[0]=='2.8.0'; print(torch.__version__,transformers.__version__,flash_attn.__version__)"
+RUN python -c "import importlib.util; assert importlib.util.find_spec('flash_attn') is None; import torch,transformers,cv2,accelerate,trimesh,moge,mdm,utils3d; assert torch.__version__.split('+')[0]=='2.8.0'; print(torch.__version__,transformers.__version__,'NO_EXTERNAL_FA2')"
 CMD ["/bin/bash"]
