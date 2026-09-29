@@ -45,7 +45,6 @@ from lingbotvla.models.vla.vision_models.module_utils import (
     get_video_target,
     log_video,
 )
-from lingbotvla.models.vla.lingbot_vla.moe_load_balance import build_moe_load_balance_hook
 import gc
 gc.set_threshold(50000, 50, 50)
 
@@ -541,6 +540,9 @@ def main():
     # bias_update_speed=0 makes the bias update a no-op (bias frozen at 0) while
     # keeping the global load monitoring intact.
     if args.train.use_moe:
+        # Import CUDA-specific MoE kernels only when actually constructing MoE.
+        # Norm computation imports argument classes on CPU-only workers.
+        from lingbotvla.models.vla.lingbot_vla.moe_load_balance import build_moe_load_balance_hook
         _lb_hook = build_moe_load_balance_hook(
             model, coeff=args.train.bias_update_speed, bias_centering=args.train.bias_centering,
             update_interval=args.train.bias_update_interval,
