@@ -13,13 +13,15 @@ WORKDIR /opt/lingbot-vla-v2
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ffmpeg libgl1 libglib2.0-0 libgomp1 libexpat1 build-essential git pkg-config ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-COPY . .
+COPY requirements.txt /tmp/lingbot-requirements.txt
+COPY docker/requirements-depth.idc.txt /tmp/lingbot-depth-requirements.txt
 RUN --mount=type=bind,from=deps,source=wheels,target=/wheels \
     python -m pip install --no-index --find-links=/wheels \
-      -r requirements.txt -r docker/requirements-depth.idc.txt setuptools==75.8.0 wheel==0.45.1 \
+      -r /tmp/lingbot-requirements.txt -r /tmp/lingbot-depth-requirements.txt setuptools==75.8.0 wheel==0.45.1 \
     && python -m pip install --no-index --find-links=/wheels --no-deps \
-      lerobot==0.3.3 numpydantic==1.9.0 \
-    && python -m pip install --no-build-isolation --no-deps -e . \
+      lerobot==0.3.3 numpydantic==1.9.0
+COPY . .
+RUN python -m pip install --no-build-isolation --no-deps -e . \
       -e lingbotvla/models/vla/vision_models/lingbot-depth \
       -e lingbotvla/models/vla/vision_models/MoGe
 RUN python -c "import site,pathlib; pathlib.Path(site.getsitepackages()[0], 'stablevla_local_depth.pth').write_text('/opt/lingbot-vla-v2/lingbotvla/models/vla/vision_models/morgbd_clean/3rd/utils3d\\n')"

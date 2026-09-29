@@ -11,7 +11,9 @@ authors = [
 ]
 description = "From Foundation to Application: Improving VLA Models in Practice"
 requires-python = ">=3.8"
-license = "Apache-2.0"
+license = {text = "Apache-2.0"}
+
+[tool.setuptools]
 license-files = ["LICENSE"]
 
 [tool.ruff]
