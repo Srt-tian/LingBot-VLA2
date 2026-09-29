@@ -24,6 +24,8 @@ COPY . .
 RUN python -m pip install --no-build-isolation --no-deps -e . \
       -e lingbotvla/models/vla/vision_models/lingbot-depth \
       -e lingbotvla/models/vla/vision_models/MoGe
-RUN python -c "import site,pathlib; pathlib.Path(site.getsitepackages()[0], 'stablevla_local_depth.pth').write_text('/opt/lingbot-vla-v2/lingbotvla/models/vla/vision_models/morgbd_clean/3rd/utils3d\\n')"
+COPY --from=deps utils3d-3fab839f.tar.gz /tmp/utils3d-3fab839f.tar.gz
+RUN python -c "import hashlib,pathlib; assert hashlib.sha256(pathlib.Path('/tmp/utils3d-3fab839f.tar.gz').read_bytes()).hexdigest()=='f1f167b1f68809bea391a66dd0d2ad0e14f7382cbddf087b655181c31a285abb'" \
+    && python -m pip install --no-build-isolation --no-deps /tmp/utils3d-3fab839f.tar.gz
 RUN python -c "import importlib.util; assert importlib.util.find_spec('flash_attn') is None; import torch,transformers,cv2,accelerate,trimesh,moge,mdm,utils3d; assert torch.__version__.split('+')[0]=='2.8.0'; print(torch.__version__,transformers.__version__,'NO_EXTERNAL_FA2')"
 CMD ["/bin/bash"]
