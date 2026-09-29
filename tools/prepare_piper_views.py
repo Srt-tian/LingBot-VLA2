@@ -29,6 +29,8 @@ def robot_config(task, prefix):
                 pieces.extend([f'        - {source}:', f'            start: {start}', f'            end: {end}'])
             if category == 'actions':
                 pieces.append('      subtract_state: ' + ('true' if feature == 'arm.position' else 'false'))
+                # Joint deltas are scalar subtraction, not EEF quaternion poses.
+                pieces.append('      relative_type: null')
     raw_cameras = ['cam_high', 'cam_left_wrist', 'cam_right_wrist'] if task == 'pepper' else ['cam_front', 'cam_left', 'cam_right']
     pieces.append('images:')
     for target, raw in zip(['camera_top', 'camera_wrist_left', 'camera_wrist_right'], raw_cameras):
