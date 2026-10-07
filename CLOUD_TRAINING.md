@@ -1,4 +1,4 @@
-# Piper five-task CLOUD 30k training
+# Piper five-task CLOUD official real-robot training
 
 Authoritative checkout: /pfs/user/code/lingbot-vla-v2-piper-five-cloud.
 Branch: train/piper-five-cloud30k. Origin: https://github.com/Srt-tian/LingBot-VLA2.git.
@@ -12,11 +12,22 @@ Use the migrated LingBot55 joint representation, not MagicVLA34.
 Metadata/index alignment adapter and source joint delta/gripper absolute semantics
 are unchanged from successful smoke. Original payloads stay read-only.
 
-Confirmed preparation recipe: 8 A800 GPUs, microbatch2/global16, Muon5e-5,
-30000steps, save10000, SDPA vision/Flex train, FSDP2, same teachers and losses.
+User superseded the smoke-derived recipe with official real-robot settings.
+Reference: Robbyant/lingbot-vla-v2 configs/vla/real_robot/real_robot.yaml,
+upstream base be969b8fd117fb70550c5d4bf4bc328211b5b1b6, also verified on main
+2026-10-07. Training_Config.md embeds a differing example; actual YAML is authoritative.
+Recipe: 8 A800 GPUs, microbatch32/global256, Muon5e-5, constant LR,
+60000steps, save20000, num_workers8, enable_resume=true,
+gradient checkpointing=false as in official YAML; SDPA vision/Flex train,
+FSDP2, same teachers and losses. Microbatch32 memory capacity remains untested.
+If memory adaptation is needed, propose it explicitly rather than silently
+reducing global batch or training duration. Existing 30k configs are historical.
 No automatic resume from the bottles smoke: all five start from official base.
 W&B online project lingbot-vla2; key/entity injected through EIP environment.
-Entrypoint: bash tools/run_piper_cloud30k.sh; TASK/OUTPUT_DIR required.
+Entrypoint: bash tools/run_piper_cloud60k.sh; TASK/OUTPUT_DIR required.
+Configs: configs/vla/real_robot/piper_<task>_cloud60k.yaml.
+Despite official enable_resume=true, a new unique output is mandatory, so fresh
+runs initialize official base, not old checkpoints.
 Each task gets a distinct output; entrypoint refuses existing output directories.
 Output override: /workspace/user/experiments/lingbot_vla_v2/<unique-run>.
 The CLOUD development machine has an hpvs_fs mount at /workspace/user,
