@@ -32,8 +32,14 @@ Each task gets a distinct output; entrypoint refuses existing output directories
 Output override: /workspace/user/experiments/lingbot_vla_v2/<unique-run>.
 The CLOUD development machine has an hpvs_fs mount at /workspace/user,
 source BFD01CD151:magiclab:/shenrongtian. Never use the /workspace root.
-Entrypoint requires an actual writable hpvs_fs mount at /workspace/user on the
-training worker too, rather than assuming the development mount is inherited.
+Entrypoint requires an actual writable mount at /workspace/user on the
+training worker too, but does not pin the development host's hpvs_fs FSTYPE.
+Bootstrap logging starts before workspace preflight and is persisted under
+/pfs/user/experiments/lingbot_vla_v2/bootstrap. An ERR trap reports phase,
+line and exit code, never shell command expansion or credential values.
+Task13557/13558 failed in about16s with no application logs; the exact original
+root cause is not proven. The FSTYPE check is removed as an unjustified constraint,
+not described as a verified fix for those failures. Official hyperparameters unchanged.
 YAML output_dir is overridden by required OUTPUT_DIR at launch. Checkpoint
 save/reload on this storage has not yet been validated; IDC smoke used PFS.
 
