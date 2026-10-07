@@ -16,10 +16,14 @@ User superseded the smoke-derived recipe with official real-robot settings.
 Reference: Robbyant/lingbot-vla-v2 configs/vla/real_robot/real_robot.yaml,
 upstream base be969b8fd117fb70550c5d4bf4bc328211b5b1b6, also verified on main
 2026-10-07. Training_Config.md embeds a differing example; actual YAML is authoritative.
-Recipe: 8 A800 GPUs, microbatch32/global256, Muon5e-5, constant LR,
+Recipe: 8 A800 GPUs, microbatch16/gradient_accumulation_steps2/global256,
+Muon5e-5, constant LR,
 60000steps, save20000, num_workers8, enable_resume=true,
 gradient checkpointing=false as in official YAML; SDPA vision/Flex train,
-FSDP2, same teachers and losses. Microbatch32 memory capacity remains untested.
+FSDP2, same teachers and losses. Task13559 microbatch32 failed at the first
+forward with CUDA OOM (79.29GiB process use on79.33GiB device); no completed step.
+User requested microbatch16; accumulation2 preserves official global256.
+This memory adaptation is configured for all five tasks, not yet runtime tested.
 If memory adaptation is needed, propose it explicitly rather than silently
 reducing global batch or training duration. Existing 30k configs are historical.
 No automatic resume from the bottles smoke: all five start from official base.
