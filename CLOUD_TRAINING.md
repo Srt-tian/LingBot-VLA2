@@ -18,6 +18,13 @@ No automatic resume from the bottles smoke: all five start from official base.
 W&B online project lingbot-vla2; key/entity injected through EIP environment.
 Entrypoint: bash tools/run_piper_cloud30k.sh; TASK/OUTPUT_DIR required.
 Each task gets a distinct output; entrypoint refuses existing output directories.
+Output override: /workspace/user/experiments/lingbot_vla_v2/<unique-run>.
+The CLOUD development machine has an hpvs_fs mount at /workspace/user,
+source BFD01CD151:magiclab:/shenrongtian. Never use the /workspace root.
+Entrypoint requires an actual writable hpvs_fs mount at /workspace/user on the
+training worker too, rather than assuming the development mount is inherited.
+YAML output_dir is overridden by required OUTPUT_DIR at launch. Checkpoint
+save/reload on this storage has not yet been validated; IDC smoke used PFS.
 
 Before submission: verify assets, exact source commit recoverable from origin,
 registry digest, cloud mount visibility, queue capacity and full resolved resources.

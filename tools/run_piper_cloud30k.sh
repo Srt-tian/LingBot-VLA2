@@ -4,7 +4,12 @@ TASK=${TASK:?Set TASK to bottles/pens/pepper/kitchen/lemon}
 case "$TASK" in bottles|pens|pepper|kitchen|lemon) ;; *) exit 2 ;; esac
 REPO_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 OUTPUT_DIR=${OUTPUT_DIR:?Set unique OUTPUT_DIR}
-case "$OUTPUT_DIR" in /pfs/user/experiments/lingbot_vla_v2/*) ;; *) exit 2 ;; esac
+case "$OUTPUT_DIR" in /workspace/user/experiments/lingbot_vla_v2/*) ;; *) exit 2 ;; esac
+# Do not silently write checkpoints to a worker's container root filesystem.
+test "$(findmnt -n -o TARGET -T /workspace/user)" = /workspace/user
+test "$(findmnt -n -o FSTYPE -T /workspace/user)" = hpvs_fs
+test -w /workspace/user
+findmnt -n -o TARGET,SOURCE,FSTYPE -T /workspace/user
 test ! -e "$OUTPUT_DIR"
 : "${WANDB_API_KEY:?Inject W&B key through EIP environment}"
 : "${WANDB_ENTITY:?Set W&B entity}"
