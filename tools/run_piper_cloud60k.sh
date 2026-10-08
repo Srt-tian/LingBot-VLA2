@@ -56,9 +56,17 @@ print('EIGHT_GPU_TASKNORM_PREFLIGHT_OK',task,flush=True)
 PY
 PHASE=create_output
 mkdir -p "$OUTPUT_DIR"
-export WANDB_DIR="$OUTPUT_DIR"
+# Frequent small writes must not use the TOS-backed checkpoint mount.
+RUNTIME_LOG_DIR=/pfs/user/experiments/lingbot_vla_v2/runtime_logs/$(basename "$OUTPUT_DIR")
+mkdir -p "$RUNTIME_LOG_DIR/tensorboard" "$RUNTIME_LOG_DIR/wandb"
+export LINGBOT_TB_DIR="$RUNTIME_LOG_DIR/tensorboard"
+export WANDB_DIR="$RUNTIME_LOG_DIR/wandb"
+export TORCH_NCCL_TRACE_BUFFER_SIZE=20000 TORCH_NCCL_DUMP_ON_TIMEOUT=1
+export TORCH_NCCL_DEBUG_INFO_TEMP_FILE="$RUNTIME_LOG_DIR/nccl_trace_"
+export PYTHONFAULTHANDLER=1
+printf 'RUNTIME_LOG_DIR=%s\n' "$RUNTIME_LOG_DIR"
 PHASE=training
 torchrun --standalone --nnodes=1 --nproc-per-node=8 tasks/vla/train_lingbotvla.py \
   "configs/vla/real_robot/piper_${TASK}_cloud60k.yaml" \
   --train.output_dir "$OUTPUT_DIR" \
-  --train.wandb_name "$(basename "$OUTPUT_DIR")" 2>&1 | tee "$OUTPUT_DIR/train.log"
+  --train.wandb_name "$(basename "$OUTPUT_DIR")" 2>&1 | tee "$RUNTIME_LOG_DIR/train.log"

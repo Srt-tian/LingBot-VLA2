@@ -569,7 +569,8 @@ def main():
     )
 
     if args.train.global_rank == 0:
-        log_dir=f"{args.train.output_dir}/runs/"
+        log_dir = os.environ.get("LINGBOT_TB_DIR", f"{args.train.output_dir}/runs/")
+        logger.info_rank0(f"TensorBoard log directory: {log_dir}")
         writer = AsyncTBWriter(log_dir=log_dir)
         if args.train.use_wandb:
             wandb.init(
@@ -1131,7 +1132,9 @@ def main():
         if not max_steps_driven:
             data_loader_tqdm.close()
         if args.train.global_rank == 0:
+            logger.info_rank0(f"Epoch {epoch + 1}: starting bounded telemetry flush")
             writer.flush()
+            logger.info_rank0(f"Epoch {epoch + 1}: telemetry flush returned")
         start_step = 0
         helper.print_device_mem_info(f"VRAM usage after epoch {epoch + 1}")
         if reached_max_steps:

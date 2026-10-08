@@ -6,6 +6,7 @@ already synced) and ``queue.put()`` (microseconds).
 """
 
 import logging
+import faulthandler
 import queue
 import threading
 
@@ -56,16 +57,26 @@ class AsyncTBWriter:
         """
         self._queue.put(("_expert_bar", (tag, counts_cpu, global_step, title)))
 
-    def flush(self):
-        """Block until all queued writes are done, then flush the event file."""
-        self._queue.join()
-        self._writer.flush()
+    def flush(self, timeout=30.0):
+        """Flush on the writer thread, never wait indefinitely on training ranks."""
+        done = threading.Event()
+        result = []
+        self._queue.put(("_flush", (done, result)))
+        if not done.wait(timeout):
+            logger.error("AsyncTBWriter flush timed out after %.1fs; backlog=%d; "
+                         "training continues, queued telemetry is not guaranteed durable",
+                         timeout, self._queue.qsize())
+            faulthandler.dump_traceback(all_threads=True)
+            return False
+        return bool(result and result[0])
 
     def close(self):
-        self.flush()
+        if not self.flush():
+            # Do not race a stuck writer with a main-thread close/file operation.
+            return False
         self._queue.put(None)  # sentinel to stop worker
         self._thread.join(timeout=10)
-        self._writer.close()
+        return not self._thread.is_alive()
 
     # ---- internals ----
 
@@ -83,11 +94,15 @@ class AsyncTBWriter:
         while True:
             item = self._queue.get()
             if item is None:
+                self._writer.close()
                 self._queue.task_done()
                 break
             method, args = item
             try:
-                if method == "_hist_from_counts":
+                if method == "_flush":
+                    self._writer.flush()
+                    args[1].append(True)
+                elif method == "_hist_from_counts":
                     self._do_histogram_from_counts(*args)
                 elif method == "_expert_bar":
                     self._do_expert_bar(*args)
@@ -95,7 +110,10 @@ class AsyncTBWriter:
                     getattr(self._writer, method)(*args)
             except Exception as e:
                 logger.warning("AsyncTBWriter: %s failed: %s", method, e)
-            self._queue.task_done()
+            finally:
+                if method == "_flush":
+                    args[0].set()
+                self._queue.task_done()
 
     def _do_expert_bar(self, tag, counts_cpu, global_step, title=None):
         import matplotlib
